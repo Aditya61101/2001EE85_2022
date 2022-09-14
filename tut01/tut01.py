@@ -1,8 +1,13 @@
 import pandas as pd
 def octant_identification(mod=5000):
+
     #reading octant_input.csv file using pandas module
     octant_ip=pd.read_csv("octant_input.csv")
-    print(octant_ip.head())
+    #calculating the mean values of U, V, W coordinates upto 9 decimal places
+    u_avg=octant_ip['U'].mean().__round__(9)
+    v_avg=octant_ip['V'].mean().__round__(9)
+    w_avg=octant_ip['W'].mean().__round__(9)
+    print(u_avg, v_avg, w_avg)
 
     
 

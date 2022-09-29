@@ -1,5 +1,44 @@
 import openpyxl
 
+def count_in_range(mod, sheet, row_max):
+    ini=2
+    fill=4
+
+    while ini<row_max:
+
+        # loop to initialize the cell value as 0
+        for j in range(14,22):
+            sheet.cell(row=fill,column=j).value=0
+
+        # loop to fill the count of octant in appropriate cell
+        for i in range(ini,mod+ini):
+            if sheet.cell(row=i,column=11).value==1:
+                sheet.cell(row=fill,column=14).value+=1
+            elif sheet.cell(row=i,column=11).value==-1:
+                sheet.cell(row=fill,column=15).value+=1
+            elif sheet.cell(row=i,column=11).value==2:
+                sheet.cell(row=fill,column=16).value+=1
+            elif sheet.cell(row=i,column=11).value==-2:
+                sheet.cell(row=fill,column=17).value+=1
+            elif sheet.cell(row=i,column=11).value==3:
+                sheet.cell(row=fill,column=18).value+=1
+            elif sheet.cell(row=i,column=11).value==-3:
+                sheet.cell(row=fill,column=19).value+=1
+            elif sheet.cell(row=i,column=11).value==4:
+                sheet.cell(row=fill,column=20).value+=1
+            elif sheet.cell(row=i,column=11).value==-4:
+                sheet.cell(row=fill,column=21).value+=1
+
+        # fill range value in appropriate cell
+        x1=str(ini-2)
+        y1=str(min(row_max-2,mod+ini-3))
+        sheet.cell(row=fill,column=13).value=x1+'-'+y1
+
+        #increasing initial value for for loop by mod
+        ini+=mod
+        #increasing filling row by 1
+        fill+=1
+
 def checkOct(u, v, w):
     if u > 0:
         if v > 0:
@@ -32,14 +71,13 @@ def checkOct(u, v, w):
                 # this means u<0 and v<0 hence 4th quad and w is -ve so -3
                 return -3
 
-def avg_calc(sheet,row_count):
+def avg_calc(sheet, row_count):
 
     #for calculating average of U
     data_U=0
     for i in range(2, row_count + 1):
         data_U += sheet.cell(row=i,column=2).value
     u_avg=data_U/row_count
-    print('Average value of U: ',data_U/(row_count))
     sheet['E1']='u_avg'
     sheet['E2']=u_avg
 
@@ -48,7 +86,6 @@ def avg_calc(sheet,row_count):
     for i in range(2, row_count + 1):
         data_V += sheet.cell(row=i,column=3).value
     v_avg=data_V/row_count
-    print('Average value of U: ',data_V/(row_count))
     sheet['F1']='v_avg'
     sheet['F2']=v_avg
 
@@ -57,12 +94,12 @@ def avg_calc(sheet,row_count):
     for i in range(2, row_count + 1):
         data_W += sheet.cell(row=i,column=4).value
     w_avg=data_W/row_count
-    print('Average value of U: ',data_W/(row_count))
     sheet['G1']='w_avg'
     sheet['G2']=w_avg
     sub_u_avg=0
     sub_v_avg=0
     sub_w_avg=0
+
     #saving U-u_avg...
     sheet['H1']='U-u_avg'
     for i in range(2, row_count + 1):
@@ -87,17 +124,48 @@ def octant_identification(mod):
     #function to calculate and save average value of U, V, W
     avg_calc(sheet,sheet.max_row)
 
-    #saving the sign of the octant
     sheet['K1']='Octant'
+
+    #initializing count values of each octant sign as 0
+    for i in range(14,22):
+        sheet.cell(row=2,column=i).value=0
+
+    #saving the sign of the octant
     for i in range(2,row_count+1):
         sub_u_avg=sheet.cell(row=i,column=8).value
         sub_v_avg=sheet.cell(row=i,column=9).value
         sub_w_avg=sheet.cell(row=i,column=10).value
         region=checkOct(sub_u_avg,sub_v_avg,sub_w_avg)
+        if region==1:
+            sheet.cell(row=2,column=14).value+=1
+        elif region==-1:
+            sheet.cell(row=2,column=15).value+=1
+        elif region==2:
+            sheet.cell(row=2,column=16).value+=1
+        elif region==-2:
+            sheet.cell(row=2,column=17).value+=1
+        elif region==3:
+            sheet.cell(row=2,column=18).value+=1
+        elif region==-3:
+            sheet.cell(row=2,column=19).value+=1
+        elif region==4:
+            sheet.cell(row=2,column=20).value+=1
+        else:
+            sheet.cell(row=2,column=21).value+=1
         sheet.cell(row=i,column=11).value=region
-
-
-
+    sheet['L3']='user_input'
+    sheet['M1']='Octant ID'
+    sheet['M2']='overall count'
+    sheet['M3']=mod
+    val=-1
+    for i in range(14,22):
+        if i%2==0:
+            sheet.cell(row=1,column=i).value=abs(val)
+        else:
+            sheet.cell(row=1,column=i).value=val
+        if i%2!=0:
+            val-=1
+    count_in_range(mod,sheet,sheet.max_row)
     
     #saving the file in given xlsx file
     wb.save('output_octant_transition_identify.xlsx')

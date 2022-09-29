@@ -82,6 +82,7 @@ def octant_identification(mod):
     # data preprocessing
     # calculating the mean values of U, V, W coordinates upto 9 decimal places
     u_avg = octant_ip_md['U'].mean()
+    print(u_avg)
     v_avg = octant_ip_md['V'].mean()
     w_avg = octant_ip_md['W'].mean()
     # inserting new columns

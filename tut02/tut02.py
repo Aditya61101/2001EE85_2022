@@ -1,9 +1,12 @@
 import openpyxl
+wb = openpyxl.load_workbook(r'input_octant_transition_identify.xlsx')
+sheet = wb.active
+row_count=sheet.max_row
 
-def count_in_range(mod, sheet, row_max):
+def count_in_range(mod):
     ini=2
     fill=4
-
+    row_max=row_count
     while ini<row_max:
 
         # loop to initialize the cell value as 0
@@ -71,7 +74,7 @@ def checkOct(u, v, w):
                 # this means u<0 and v<0 hence 4th quad and w is -ve so -3
                 return -3
 
-def avg_calc(sheet, row_count):
+def avg_calc():
 
     #for calculating average of U
     data_U=0
@@ -117,12 +120,9 @@ def avg_calc(sheet, row_count):
         sheet.cell(row=i,column=10).value=sub_w_avg
 
 def octant_identification(mod):
-    wb = openpyxl.load_workbook(r'input_octant_transition_identify.xlsx')
-    sheet = wb.active
-    row_count=sheet.max_row
 
     #function to calculate and save average value of U, V, W
-    avg_calc(sheet,sheet.max_row)
+    avg_calc()
 
     sheet['K1']='Octant'
 
@@ -165,11 +165,8 @@ def octant_identification(mod):
             sheet.cell(row=1,column=i).value=val
         if i%2!=0:
             val-=1
-    count_in_range(mod,sheet,sheet.max_row)
+    count_in_range(mod)
     
-    #saving the file in given xlsx file
-    wb.save('output_octant_transition_identify.xlsx')
-
 from platform import python_version
 ver = python_version()
 
@@ -180,3 +177,5 @@ else:
 
 mod=5000
 octant_identification(mod)
+#saving the file in given xlsx file
+wb.save('output_octant_transition_identify.xlsx')

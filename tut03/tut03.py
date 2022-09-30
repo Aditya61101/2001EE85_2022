@@ -100,7 +100,21 @@ def octant_identification():
     #function to calculate and save average value of U, V, W
     avg_calc()
     sheet['K1']='Octant'
-
+    #saving the sign of the octant
+    for i in range(2,row_count+1):
+        try:
+            sub_u_avg=sheet.cell(row=i,column=8).value
+            sub_v_avg=sheet.cell(row=i,column=9).value
+            sub_w_avg=sheet.cell(row=i,column=10).value
+            try:
+                octant_sign=check_octant_sign(sub_u_avg,sub_v_avg,sub_w_avg)
+            except NameError:
+                print('Either the function is not defined or is not named correctly')
+                exit()
+            sheet.cell(row=i,column=11).value=octant_sign
+        except FileNotFoundError:
+            print('File not found!')
+            exit()
 
 from platform import python_version
 ver = python_version()

@@ -32,7 +32,7 @@ def octant_longest_subsequence_count():
                 count_length=0
         sheet.cell(row=j+2,column=14).value=max_length
         sheet.cell(row=j+2,column=15).value=count
-        
+
 def check_octant_sign(u, v, w):
     if u > 0:
         if v > 0:
@@ -146,7 +146,16 @@ if ver == "3.8.10":
 else:
     print("Please install 3.8.10. Instruction are present in the GitHub Repo/Webmail. Url: https://pastebin.com/nvibxmjw")
 
-octant_identification()
+try:
+    octant_identification()
+except NameError:
+    print('Either no such function exists or the name is not created')
+    exit()
+try:
+    octant_longest_subsequence_count()
+except NameError:
+    print('Either no such function exists or the name is not created')
+    exit()
 #saving the file in the given xlsx file
 wb.save('output_octant_longest_subsequence.xlsx')
 

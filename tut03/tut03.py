@@ -11,6 +11,28 @@ Octant_Sign_List = [1, -1, 2, -2, 3, -3, 4, -4]
 from datetime import datetime
 start_time = datetime.now()
 
+def octant_longest_subsequence_count():
+    sheet['M1']='Count'
+    sheet['N1']='Longest Subsequence Length'
+    sheet['O1']='Count'
+    for i, label in enumerate(Octant_Sign_List):
+        sheet.cell(row=i+2,column=13).value=label
+
+    for j, label in enumerate(Octant_Sign_List):
+        count_length, max_length, count=0,  -1, 0
+        for i in range(2, row_count+1):
+            if label == sheet.cell(row=i,column=11).value:
+                count_length+=1
+            else:
+                if count_length>max_length:
+                    count=0
+                max_length=max(max_length,count_length)
+                if max_length==count_length:
+                    count+=1
+                count_length=0
+        sheet.cell(row=j+2,column=14).value=max_length
+        sheet.cell(row=j+2,column=15).value=count
+        
 def check_octant_sign(u, v, w):
     if u > 0:
         if v > 0:

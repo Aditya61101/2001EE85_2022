@@ -15,24 +15,38 @@ def octant_longest_subsequence_count():
     sheet['M1']='Count'
     sheet['N1']='Longest Subsequence Length'
     sheet['O1']='Count'
+
+    #creating the table for storing longest subsequence length and count
     for i, label in enumerate(Octant_Sign_List):
         sheet.cell(row=i+2,column=13).value=label
+    try:
+        # loop to calculate max_length and frequency for each octant
+        for j, label in enumerate(Octant_Sign_List):
+            count_length, max_length, count= 0, -1, 0
+            for i in range(2, row_count+1):
 
-    for j, label in enumerate(Octant_Sign_List):
-        count_length, max_length, count=0,  -1, 0
-        for i in range(2, row_count+1):
-            if label == sheet.cell(row=i,column=11).value:
-                count_length+=1
-            else:
-                if count_length>max_length:
-                    count=0
-                max_length=max(max_length,count_length)
-                if max_length==count_length:
-                    count+=1
-                count_length=0
-        sheet.cell(row=j+2,column=14).value=max_length
-        sheet.cell(row=j+2,column=15).value=count
+                #if the octant sign matches the label value then increase the count_length
+                if label == sheet.cell(row=i,column=11).value:
+                    count_length+=1
 
+                # if it doesn't then calculate the max length and make the count_length again to 0
+                else:
+                    if count_length>max_length:
+                        count=0
+                    # calculating maximum length
+                    max_length=max(max_length,count_length)
+
+                    # if the count length again becomes equal to the max_length then this means that there is another occurrence of same length subsequence hence increase the count frequency by 1
+                    if max_length==count_length:
+                        count+=1
+
+                    # making count_length = 0 again
+                    count_length=0
+            sheet.cell(row=j+2,column=14).value=max_length
+            sheet.cell(row=j+2,column=15).value=count
+    except FileNotFoundError:
+        print('File not found')
+        exit()
 def check_octant_sign(u, v, w):
     if u > 0:
         if v > 0:

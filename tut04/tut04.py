@@ -19,38 +19,84 @@ def octant_longest_subsequence_count_with_range():
     sheet['Q1'] = 'Count'
     sheet['R1'] = 'Longest Subsequence Length'
     sheet['S1'] = 'Count'
+    # setting up the table for longest subsequence with range
     j=2
-    for i in range(2,10):
-        sheet.cell(row=j,column=17).value=sheet.cell(row=i,column=13).value
-        sheet.cell(row=j,column=18).value=sheet.cell(row=i,column=14).value
-        sheet.cell(row=j,column=19).value=sheet.cell(row=i,column=15).value
-        sheet.cell(row=j+1,column=17).value='Time'
-        sheet.cell(row=j+1,column=18).value='From'
-        sheet.cell(row=j+1,column=19).value='To'
-        j+=sheet.cell(row=i,column=15).value+2
+    try:
+        for i in range(2,10):
+            sheet.cell(row=j,column=17).value=sheet.cell(row=i,column=13).value
+            sheet.cell(row=j,column=18).value=sheet.cell(row=i,column=14).value
+            sheet.cell(row=j,column=19).value=sheet.cell(row=i,column=15).value
+            sheet.cell(row=j+1,column=17).value='Time'
+            sheet.cell(row=j+1,column=18).value='From'
+            sheet.cell(row=j+1,column=19).value='To'
+            j+=sheet.cell(row=i,column=15).value+2
+    except FileNotFoundError:
+        print("File not found")
+        exit()
+    # code to calculate the time range for each longest subsequence
+    k=4
+    try:
+        for j, label in enumerate(Octant_Sign_List):
+            count_length=0
+            for i in range(2,row_count+1):
+                max_length=sheet.cell(row=j+2,column=14).value
 
+                # if the value matches the label then we increase the count_length
+                if label == sheet.cell(row=i, column=11).value:
+                    count_length += 1
+                # if it doesn't then count_length becomes 0 again
+                else:
+                    count_length=0
 
+                # if the length of the subsequence matched the longest subsequence this means we can extract the end time from it
+                if count_length==max_length:
+                    # end time for particular octant sign
+                    time_end=sheet.cell(row=i,column=1).value
+                    
+                    # calculated start time for the octant
+                    time_start=time_end-((max_length)/100)+0.01
+
+                    # saving it in the sheet
+                    sheet.cell(row=k,column=18).value=time_start
+                    sheet.cell(row=k,column=19).value=time_end
+
+                    # increasing saved row by one
+                    k+=1
+                    count_length=0
+            k+=2
+    except FileNotFoundError:
+        print('File not found')
+        exit()
+        
 def octant_longest_subsequence_count():
     sheet['M1'] = 'Count'
     sheet['N1'] = 'Longest Subsequence Length'
     sheet['O1'] = 'Count'
     for i, label in enumerate(Octant_Sign_List):
         sheet.cell(row=i+2, column=13).value = label
+    try:
+        for j, label in enumerate(Octant_Sign_List):
 
-    for j, label in enumerate(Octant_Sign_List):
-        count_length, max_length, count = 0, -1, 0
-        for i in range(2, row_count+1):
-            if label == sheet.cell(row=i, column=11).value:
-                count_length += 1
-            else:
-                if count_length > max_length:
-                    count = 0
-                max_length = max(max_length, count_length)
-                if max_length == count_length:
-                    count += 1
-                count_length = 0
-        sheet.cell(row=j+2, column=14).value = max_length
-        sheet.cell(row=j+2, column=15).value = count
+            count_length, max_length, count = 0, -1, 0
+            for i in range(2, row_count+1):
+                # if the value matches the label then we increase the count_length
+                if label == sheet.cell(row=i, column=11).value:
+                    count_length += 1
+
+                # if it doesn't matches then we make the count_length=0 and save the maximum length obtained
+                else:
+                    if count_length > max_length:
+                        count = 0
+                    # calculating maximum length
+                    max_length = max(max_length, count_length)
+                    if max_length == count_length:
+                        count += 1
+                    count_length = 0
+            sheet.cell(row=j+2, column=14).value = max_length
+            sheet.cell(row=j+2, column=15).value = count
+    except FileNotFoundError:
+        print('File not found!')
+        exit()
 
 def check_octant_sign(u, v, w):
     if u > 0:
@@ -83,7 +129,6 @@ def check_octant_sign(u, v, w):
             else:
                 # this means u<0 and v<0 hence 4th quad and w is -ve so -3
                 return -3
-
 
 def avg_calc():
     data_U = 0
@@ -171,17 +216,17 @@ else:
 try:
     octant_identification()
 except NameError:
-    print('Either no such function exists or the name is not created')
+    print('Either no such function exists or the function is not created')
     exit()
 try:
     octant_longest_subsequence_count()
 except NameError:
-    print('Either no such function exists or the name is not created')
+    print('Either no such function exists or the function is not created')
     exit()
 try:
     octant_longest_subsequence_count_with_range()
 except NameError:
-    print('Either no such function exists or the name is not created')
+    print('Either no such function exists or the function is not created')
     exit()
 
 # saving the file in the given xlsx file

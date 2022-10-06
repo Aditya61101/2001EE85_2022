@@ -3,6 +3,8 @@ import pandas as pd
 
 
 def saveOctant(octant_op, mod):
+    if mod>30000:
+        raise Exception('mod value should be less than or equal to 30000')
     size = len(octant_op['octant'])
     actual_size = len(octant_op['octant'])
     index = 0
@@ -75,14 +77,19 @@ def checkOct(u, v, w):
 
 
 def octant_identification(mod):
-
-    # reading octant_input.csv file using pandas module
-    octant_ip_md = pd.read_csv("octant_input.csv")
+    if mod>30000:
+        raise Exception('mod value should be less than or equal to 30000')
+        
+    try:
+        # reading octant_input.csv file using pandas module
+        octant_ip_md = pd.read_csv("octant_input.csv")
+    except FileNotFoundError:
+        print('File not found')
+        exit()
 
     # data preprocessing
     # calculating the mean values of U, V, W coordinates upto 9 decimal places
     u_avg = octant_ip_md['U'].mean()
-    print(u_avg)
     v_avg = octant_ip_md['V'].mean()
     w_avg = octant_ip_md['W'].mean()
     # inserting new columns
@@ -117,7 +124,6 @@ def octant_identification(mod):
     octant_ip_md.at[1, 'Octant ID'] = mod
     saveOctant(octant_ip_md, mod)
 
-
 ver = python_version()
 
 if ver == "3.8.10":
@@ -126,4 +132,7 @@ else:
     print("Please install 3.8.10. Instruction are present in the GitHub Repo/Webmail. Url: https://pastebin.com/nvibxmjw")
 
 mod = 5000
-octant_identification(mod)
+try:
+    octant_identification(mod)
+except NameError:
+    print('Either the function name is wrong or the function does not exists')

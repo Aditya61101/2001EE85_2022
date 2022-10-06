@@ -16,7 +16,18 @@ start_time = datetime.now()
 
 
 def octant_longest_subsequence_count_with_range():
-    pass
+    sheet['Q1'] = 'Count'
+    sheet['R1'] = 'Longest Subsequence Length'
+    sheet['S1'] = 'Count'
+    j=2
+    for i in range(2,10):
+        sheet.cell(row=j,column=17).value=sheet.cell(row=i,column=13).value
+        sheet.cell(row=j,column=18).value=sheet.cell(row=i,column=14).value
+        sheet.cell(row=j,column=19).value=sheet.cell(row=i,column=15).value
+        sheet.cell(row=j+1,column=17).value='Time'
+        sheet.cell(row=j+1,column=18).value='From'
+        sheet.cell(row=j+1,column=19).value='To'
+        j+=sheet.cell(row=i,column=15).value+2
 
 
 def octant_longest_subsequence_count():
@@ -27,7 +38,7 @@ def octant_longest_subsequence_count():
         sheet.cell(row=i+2, column=13).value = label
 
     for j, label in enumerate(Octant_Sign_List):
-        count_length, max_length, count = 0,  -1, 0
+        count_length, max_length, count = 0, -1, 0
         for i in range(2, row_count+1):
             if label == sheet.cell(row=i, column=11).value:
                 count_length += 1

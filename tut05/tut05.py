@@ -17,6 +17,49 @@ def octant_range_names(mod=5000):
 
 ###Code
 
+def count_in_range(mod):
+    if mod>30000:
+        raise Exception('mod value should be less than or equal to 30000')
+    start=2
+    fill=4
+    while start<total_count:
+        # loop to initialize the cell value as 0
+        try:
+            for j in range(14,22):
+                sheet.cell(row=fill,column=j).value=0
+
+            # loop to fill the count of octant in appropriate cell
+            for i in range(start,min(row_count+1,mod+start)):
+                region = sheet.cell(row=i,column=11).value
+                if region==1:
+                    sheet.cell(row=fill,column=14).value+=1
+                elif region==-1:
+                    sheet.cell(row=fill,column=15).value+=1
+                elif region==2:
+                    sheet.cell(row=fill,column=16).value+=1
+                elif region==-2:
+                    sheet.cell(row=fill,column=17).value+=1
+                elif region==3:
+                    sheet.cell(row=fill,column=18).value+=1
+                elif region==-3:
+                    sheet.cell(row=fill,column=19).value+=1
+                elif region==4:
+                    sheet.cell(row=fill,column=20).value+=1
+                else:
+                    sheet.cell(row=fill,column=21).value+=1
+            # filling range value in appropriate cell
+            x1=str(start-2)
+            y1=str(min(total_count-1,mod+start-3))
+            sheet.cell(row=fill,column=13).value=x1+'-'+y1
+
+            #increasing initial value for 'for' loop by mod
+            start+=mod
+            #increasing filling row by 1
+            fill+=1
+        except FileNotFoundError:
+            print('File not found!')
+            exit()
+
 def check_octant_sign(u, v, w):
     if u > 0:
         if v > 0:
@@ -48,7 +91,7 @@ def check_octant_sign(u, v, w):
             else:
                 # this means u<0 and v<0 hence 4th quad and w is -ve so -3
                 return -3
-                
+
 def avg_calc():
     data_U=0
     data_V=0
@@ -108,6 +151,52 @@ def octant_identification(mod):
     #function to calculate and save average value of U, V, W
     avg_calc()
 
+    sheet['K1']='Octant'
+    #initializing count values of each octant sign as 0
+    for j in range(14,22):
+        sheet.cell(row=2,column=j).value=0
+    #saving the sign of the octant
+    for i in range(2,row_count+1):
+        try:
+            sub_u_avg=sheet.cell(row=i,column=8).value
+            sub_v_avg=sheet.cell(row=i,column=9).value
+            sub_w_avg=sheet.cell(row=i,column=10).value
+            try:
+                octant_sign=check_octant_sign(sub_u_avg,sub_v_avg,sub_w_avg)
+            except NameError:
+                print('Either the function is not defined or is not named correctly')
+                exit()
+            if octant_sign==1:
+                sheet.cell(row=2,column=14).value+=1
+            elif octant_sign==-1:
+                sheet.cell(row=2,column=15).value+=1
+            elif octant_sign==2:
+                sheet.cell(row=2,column=16).value+=1
+            elif octant_sign==-2:
+                sheet.cell(row=2,column=17).value+=1
+            elif octant_sign==3:
+                sheet.cell(row=2,column=18).value+=1
+            elif octant_sign==-3:
+                sheet.cell(row=2,column=19).value+=1
+            elif octant_sign==4:
+                sheet.cell(row=2,column=20).value+=1
+            elif octant_sign==-4:
+                sheet.cell(row=2,column=21).value+=1
+            sheet.cell(row=i,column=11).value=octant_sign
+        except FileNotFoundError:
+            print('File not found!')
+            exit()
+    sheet['L3']='user input'
+    sheet['M1']='Octant ID'
+    sheet['M2']='Overall Count'
+    sheet['M3']= 'Mod '+ str(mod)
+    # filling 1, -1, 2, -2, 3, -3, 4, -4 value as a heading of columns
+    for j, label in enumerate(Octant_Sign_List):
+        sheet.cell(row=1, column=j+14).value=label
+
+    # calling function to count octant sign in the given range
+    count_in_range(mod)
+
 from platform import python_version
 ver = python_version()
 
@@ -122,7 +211,10 @@ try:
     octant_identification(mod)
 except NameError:
     print('Either the function name is wrong or the function does not exists')
-octant_range_names(mod)
+try:
+    octant_range_names(mod)
+except NameError:
+    print('Either the function name is wrong or the function does not exists')
 
 wb.save('octant_output_ranking_excel.xlsx')
 

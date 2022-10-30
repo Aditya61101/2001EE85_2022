@@ -17,6 +17,38 @@ def octant_range_names(mod=5000):
 
 ###Code
 
+def check_octant_sign(u, v, w):
+    if u > 0:
+        if v > 0:
+            if w > 0:
+                # this means (u,v) is +ve hence 1st quad and w is +ve so +1
+                return 1
+            else:
+                # this means (u,v) is +ve hence 1st quad but w is -ve so -1
+                return -1
+        else:
+            if w > 0:
+                # this means u>0 and v<0 hence 4th quad and w is +ve so +4
+                return 4
+            else:
+                # this means u>0 and v<0 hence 4th quad but w is -ve so -4
+                return -4
+    else:
+        if v > 0:
+            if w > 0:
+                # this means u<0 and v>0 hence 4th quad and w is +ve so +2
+                return 2
+            else:
+                # this means u<0 and v>0 hence 4th quad but w is -ve so -2
+                return -2
+        else:
+            if w > 0:
+                # this means u<0 and v<0 hence 4th quad and w is +ve so +3
+                return 3
+            else:
+                # this means u<0 and v<0 hence 4th quad and w is -ve so -3
+                return -3
+                
 def avg_calc():
     data_U=0
     data_V=0
@@ -75,7 +107,7 @@ def octant_identification(mod):
         raise Exception('mod value should be less than or equal to 30000')
     #function to calculate and save average value of U, V, W
     avg_calc()
-    
+
 from platform import python_version
 ver = python_version()
 

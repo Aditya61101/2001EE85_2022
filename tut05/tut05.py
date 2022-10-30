@@ -11,11 +11,26 @@ Octant_Sign_List = [1, -1, 2, -2, 3, -3, 4, -4]
 
 #Help https://youtu.be/N6PBd4XdnEw
 
-def octant_range_names(mod=5000):
+# def octant_range_names(mod=5000):
     
-    octant_name_id_mapping = {"1":"Internal outward interaction", "-1":"External outward interaction", "2":"External Ejection", "-2":"Internal Ejection", "3":"External inward interaction", "-3":"Internal inward interaction", "4":"Internal sweep", "-4":"External sweep"}
+#     octant_name_id_mapping = {"1":"Internal outward interaction", "-1":"External outward interaction", "2":"External Ejection", "-2":"Internal Ejection", "3":"External inward interaction", "-3":"Internal inward interaction", "4":"Internal sweep", "-4":"External sweep"}
 
 ###Code
+def octant_ranking(mod):
+    octant_name_id_mapping = {"1":"Internal outward interaction", "-1":"External outward interaction", "2":"External Ejection", "-2":"Internal Ejection", "3":"External inward interaction", "-3":"Internal inward interaction", "4":"Internal sweep", "-4":"External sweep"}
+    dynamic_row = (30000/mod)+8
+    for i, label in enumerate(Octant_Sign_List):
+        sheet.cell(row=1, column=i+22).value = label
+        sheet.cell(row=2, column=i+22).value = 'Rank ' + str(i+1)
+        sheet.cell(row=dynamic_row+i+1,column=14).value=label
+        sheet.cell(row=dynamic_row+i+1,column=15).value=octant_name_id_mapping[str(label)]
+    
+    sheet.cell(row=2, column=30).value = 'Rank1 Octant ID'
+    sheet.cell(row=2, column=31).value = 'Rank1 Octant Name'
+    sheet.cell(row=dynamic_row, column=14).value = 'Octant ID'
+    sheet.cell(row=dynamic_row, column=15).value = 'Octant Name'
+    sheet.cell(row=dynamic_row, column=16).value = 'Count of Rank1 Mod values'
+
 
 def count_in_range(mod):
     if mod>30000:
@@ -114,7 +129,6 @@ def avg_calc():
     except(ZeroDivisionError):
         print("No input data found!!\nDivision by zero is not allowed!")
         exit()
-
     try:
         #saving average of U in the sheet
         sheet['E2']=u_avg
@@ -213,6 +227,10 @@ except NameError:
     print('Either the function name is wrong or the function does not exists')
 try:
     octant_range_names(mod)
+except NameError:
+    print('Either the function name is wrong or the function does not exists')
+try:
+    octant_ranking(mod)
 except NameError:
     print('Either the function name is wrong or the function does not exists')
 

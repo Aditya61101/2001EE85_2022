@@ -1,4 +1,3 @@
-
 import openpyxl
 wb = openpyxl.load_workbook(r'octant_input.xlsx')
 sheet = wb.active
@@ -6,22 +5,19 @@ row_count=sheet.max_row
 total_count=row_count-1
 from datetime import datetime
 start_time = datetime.now()
+
 # List to store octant signs
 Octant_Sign_List = [1, -1, 2, -2, 3, -3, 4, -4]
 
 #Help https://youtu.be/N6PBd4XdnEw
 
-# def octant_range_names(mod=5000):
-    
-#     octant_name_id_mapping = {"1":"Internal outward interaction", "-1":"External outward interaction", "2":"External Ejection", "-2":"Internal Ejection", "3":"External inward interaction", "-3":"Internal inward interaction", "4":"Internal sweep", "-4":"External sweep"}
-
 ###Code
 def octant_ranking(mod):
     octant_name_id_mapping = {"1":"Internal outward interaction", "-1":"External outward interaction", "2":"External Ejection", "-2":"Internal Ejection", "3":"External inward interaction", "-3":"Internal inward interaction", "4":"Internal sweep", "-4":"External sweep"}
-    dynamic_row = (30000/mod)+8
+    dynamic_row = (30000//mod)+8
     for i, label in enumerate(Octant_Sign_List):
         sheet.cell(row=1, column=i+22).value = label
-        sheet.cell(row=2, column=i+22).value = 'Rank ' + str(i+1)
+        sheet.cell(row=2, column=i+22).value = 'Rank of ' + str(label)
         sheet.cell(row=dynamic_row+i+1,column=14).value=label
         sheet.cell(row=dynamic_row+i+1,column=15).value=octant_name_id_mapping[str(label)]
     
@@ -31,12 +27,29 @@ def octant_ranking(mod):
     sheet.cell(row=dynamic_row, column=15).value = 'Octant Name'
     sheet.cell(row=dynamic_row, column=16).value = 'Count of Rank1 Mod values'
 
+    # octant ranking Code
+    for i in range(3,5+(30000//mod)):
+        if i==4:
+            continue
+        list_tuple_rank=[]
+        for j in range(14,22):
+            count = int(sheet.cell(row=i,column=j).value)
+            column_no = j
+            list_tuple_rank.append((column_no,count))
+
+        # sorting in descending order on the basis of count values
+        list_tuple_rank.sort(key=lambda x:x[1], reverse=True)
+        # storing the rank in the sheet
+        rank=1
+        for pair in list_tuple_rank:
+            sheet.cell(row = i,column = pair[0]+8).value=rank
+            rank+=1
 
 def count_in_range(mod):
     if mod>30000:
         raise Exception('mod value should be less than or equal to 30000')
     start=2
-    fill=4
+    fill=5
     while start<total_count:
         # loop to initialize the cell value as 0
         try:
@@ -168,7 +181,7 @@ def octant_identification(mod):
     sheet['K1']='Octant'
     #initializing count values of each octant sign as 0
     for j in range(14,22):
-        sheet.cell(row=2,column=j).value=0
+        sheet.cell(row=3,column=j).value=0
     #saving the sign of the octant
     for i in range(2,row_count+1):
         try:
@@ -181,32 +194,32 @@ def octant_identification(mod):
                 print('Either the function is not defined or is not named correctly')
                 exit()
             if octant_sign==1:
-                sheet.cell(row=2,column=14).value+=1
+                sheet.cell(row=3,column=14).value+=1
             elif octant_sign==-1:
-                sheet.cell(row=2,column=15).value+=1
+                sheet.cell(row=3,column=15).value+=1
             elif octant_sign==2:
-                sheet.cell(row=2,column=16).value+=1
+                sheet.cell(row=3,column=16).value+=1
             elif octant_sign==-2:
-                sheet.cell(row=2,column=17).value+=1
+                sheet.cell(row=3,column=17).value+=1
             elif octant_sign==3:
-                sheet.cell(row=2,column=18).value+=1
+                sheet.cell(row=3,column=18).value+=1
             elif octant_sign==-3:
-                sheet.cell(row=2,column=19).value+=1
+                sheet.cell(row=3,column=19).value+=1
             elif octant_sign==4:
-                sheet.cell(row=2,column=20).value+=1
+                sheet.cell(row=3,column=20).value+=1
             elif octant_sign==-4:
-                sheet.cell(row=2,column=21).value+=1
+                sheet.cell(row=3,column=21).value+=1
             sheet.cell(row=i,column=11).value=octant_sign
         except FileNotFoundError:
             print('File not found!')
             exit()
-    sheet['L3']='user input'
-    sheet['M1']='Octant ID'
-    sheet['M2']='Overall Count'
-    sheet['M3']= 'Mod '+ str(mod)
+    sheet['L4']='user input'
+    sheet['M2']='Octant ID'
+    sheet['M3']='Overall Count'
+    sheet['M4']= 'Mod '+ str(mod)
     # filling 1, -1, 2, -2, 3, -3, 4, -4 value as a heading of columns
     for j, label in enumerate(Octant_Sign_List):
-        sheet.cell(row=1, column=j+14).value=label
+        sheet.cell(row=2, column=j+14).value=label
 
     # calling function to count octant sign in the given range
     count_in_range(mod)
@@ -223,10 +236,6 @@ else:
 mod=5000
 try:
     octant_identification(mod)
-except NameError:
-    print('Either the function name is wrong or the function does not exists')
-try:
-    octant_range_names(mod)
 except NameError:
     print('Either the function name is wrong or the function does not exists')
 try:

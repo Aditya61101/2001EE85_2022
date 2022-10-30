@@ -1,17 +1,20 @@
+from datetime import datetime
+start_time = datetime.now()
+
+#importing input excel file
 import openpyxl
 wb = openpyxl.load_workbook(r'octant_input.xlsx')
 sheet = wb.active
+
+#calculating no. of rows
 row_count=sheet.max_row
 total_count=row_count-1
-from datetime import datetime
-start_time = datetime.now()
+
 
 # List to store octant signs
 Octant_Sign_List = [1, -1, 2, -2, 3, -3, 4, -4]
 
-#Help https://youtu.be/N6PBd4XdnEw
-
-###Code
+#Code
 def octant_ranking(mod):
     octant_name_id_mapping = {"1":"Internal outward interaction", "-1":"External outward interaction", "2":"External Ejection", "-2":"Internal Ejection", "3":"External inward interaction", "-3":"Internal inward interaction", "4":"Internal sweep", "-4":"External sweep"}
     dynamic_row = (30000//mod)+8
@@ -36,14 +39,29 @@ def octant_ranking(mod):
             count = int(sheet.cell(row=i,column=j).value)
             column_no = j
             list_tuple_rank.append((column_no,count))
-
         # sorting in descending order on the basis of count values
         list_tuple_rank.sort(key=lambda x:x[1], reverse=True)
         # storing the rank in the sheet
         rank=1
         for pair in list_tuple_rank:
-            sheet.cell(row = i,column = pair[0]+8).value=rank
+            sheet.cell(row = i, column = pair[0]+8).value = rank
             rank+=1
+        # finding and storing rank1 for each mod value and overall count as well
+        for j in range(22,30):
+            if int(sheet.cell(row = i, column = j).value) == 1:
+                octant_sign_rank1 = sheet.cell(row = 1, column = j).value
+                sheet.cell(row = i, column = 30).value = octant_sign_rank1
+                sheet.cell(row = i, column = 31).value = octant_name_id_mapping[str(octant_sign_rank1)]
+                break
+    # calculate the number of rank1 for each octant_sign per mod
+    start = dynamic_row+1
+    for j in range(22,30):
+        count_rank1 = 0
+        for i in range(5,5+(30000//mod)):
+            if int(sheet.cell(row = i,column = j).value)==1:
+                count_rank1+=1
+        sheet.cell(row = start,column = 16).value = count_rank1
+        start+=1
 
 def count_in_range(mod):
     if mod>30000:

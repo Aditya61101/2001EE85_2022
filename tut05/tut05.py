@@ -16,52 +16,69 @@ Octant_Sign_List = [1, -1, 2, -2, 3, -3, 4, -4]
 
 #Code
 def octant_ranking(mod):
+    if mod>30000:
+        raise Exception('mod value should be less than or equal to 30000')
+
     octant_name_id_mapping = {"1":"Internal outward interaction", "-1":"External outward interaction", "2":"External Ejection", "-2":"Internal Ejection", "3":"External inward interaction", "-3":"Internal inward interaction", "4":"Internal sweep", "-4":"External sweep"}
     dynamic_row = (30000//mod)+8
     for i, label in enumerate(Octant_Sign_List):
-        sheet.cell(row=1, column=i+22).value = label
-        sheet.cell(row=2, column=i+22).value = 'Rank of ' + str(label)
-        sheet.cell(row=dynamic_row+i+1,column=14).value=label
-        sheet.cell(row=dynamic_row+i+1,column=15).value=octant_name_id_mapping[str(label)]
-    
-    sheet.cell(row=2, column=30).value = 'Rank1 Octant ID'
-    sheet.cell(row=2, column=31).value = 'Rank1 Octant Name'
-    sheet.cell(row=dynamic_row, column=14).value = 'Octant ID'
-    sheet.cell(row=dynamic_row, column=15).value = 'Octant Name'
-    sheet.cell(row=dynamic_row, column=16).value = 'Count of Rank1 Mod values'
-
+        try:
+            sheet.cell(row=1, column=i+22).value = label
+            sheet.cell(row=2, column=i+22).value = 'Rank of ' + str(label)
+            sheet.cell(row=dynamic_row+i+1,column=14).value=label
+            sheet.cell(row=dynamic_row+i+1,column=15).value=octant_name_id_mapping[str(label)]
+        except FileNotFoundError:
+            print("File not found")
+            exit()
+    try:
+        sheet.cell(row=2, column=30).value = 'Rank1 Octant ID'
+        sheet.cell(row=2, column=31).value = 'Rank1 Octant Name'
+        sheet.cell(row=dynamic_row, column=14).value = 'Octant ID'
+        sheet.cell(row=dynamic_row, column=15).value = 'Octant Name'
+        sheet.cell(row=dynamic_row, column=16).value = 'Count of Rank1 Mod values'
+    except FileNotFoundError:
+        print("File not found")
+        exit()
     # octant ranking Code
     for i in range(3,5+(30000//mod)):
-        if i==4:
-            continue
-        list_tuple_rank=[]
-        for j in range(14,22):
-            count = int(sheet.cell(row=i,column=j).value)
-            column_no = j
-            list_tuple_rank.append((column_no,count))
-        # sorting in descending order on the basis of count values
-        list_tuple_rank.sort(key=lambda x:x[1], reverse=True)
-        # storing the rank in the sheet
-        rank=1
-        for pair in list_tuple_rank:
-            sheet.cell(row = i, column = pair[0]+8).value = rank
-            rank+=1
-        # finding and storing rank1 for each mod value and overall count as well
-        for j in range(22,30):
-            if int(sheet.cell(row = i, column = j).value) == 1:
-                octant_sign_rank1 = sheet.cell(row = 1, column = j).value
-                sheet.cell(row = i, column = 30).value = octant_sign_rank1
-                sheet.cell(row = i, column = 31).value = octant_name_id_mapping[str(octant_sign_rank1)]
-                break
+        try:
+            if i==4:
+                continue
+            list_tuple_rank=[]
+            for j in range(14,22):
+                count = int(sheet.cell(row=i,column=j).value)
+                column_no = j
+                list_tuple_rank.append((column_no,count))
+            # sorting in descending order on the basis of count values
+            list_tuple_rank.sort(key=lambda x:x[1], reverse=True)
+            # storing the rank in the sheet
+            rank=1
+            for pair in list_tuple_rank:
+                sheet.cell(row = i, column = pair[0]+8).value = rank
+                rank+=1
+            # finding and storing rank1 for each mod value and overall count as well
+            for j in range(22,30):
+                if int(sheet.cell(row = i, column = j).value) == 1:
+                    octant_sign_rank1 = sheet.cell(row = 1, column = j).value
+                    sheet.cell(row = i, column = 30).value = octant_sign_rank1
+                    sheet.cell(row = i, column = 31).value = octant_name_id_mapping[str(octant_sign_rank1)]
+                    break
+        except FileNotFoundError:
+            print("File not found")
+            exit()
     # calculate the number of rank1 for each octant_sign per mod
     start = dynamic_row+1
     for j in range(22,30):
-        count_rank1 = 0
-        for i in range(5,5+(30000//mod)):
-            if int(sheet.cell(row = i,column = j).value)==1:
-                count_rank1+=1
-        sheet.cell(row = start,column = 16).value = count_rank1
-        start+=1
+        try:
+            count_rank1 = 0
+            for i in range(5,5+(30000//mod)):
+                if int(sheet.cell(row = i,column = j).value)==1:
+                    count_rank1+=1
+            sheet.cell(row = start,column = 16).value = count_rank1
+            start+=1
+        except FileNotFoundError:
+            print ("File not found")
+            exit()
 
 def count_in_range(mod):
     if mod>30000:
@@ -250,8 +267,8 @@ if ver == "3.8.10":
 else:
     print("Please install 3.8.10. Instruction are present in the GitHub Repo/Webmail. Url: https://pastebin.com/nvibxmjw")
 
-
 mod=5000
+
 try:
     octant_identification(mod)
 except NameError:
@@ -261,6 +278,7 @@ try:
 except NameError:
     print('Either the function name is wrong or the function does not exists')
 
+#saving the output file
 wb.save('octant_output_ranking_excel.xlsx')
 
 #This shall be the last lines of the code.

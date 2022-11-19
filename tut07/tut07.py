@@ -60,6 +60,100 @@ def set_rank_count(row,countMap, outputSheet):
     outputSheet.cell(row=row , column=31).value = rank1Oct
     outputSheet.cell(row=row , column=32).value = octant_name_id_mapping[rank1Oct]
 
+def overall_octant_rank_func(last_row, outputSheet):
+    count = {-1:0, 1:0, -2:0, 2:0, -3:0, 3:0, -4:0, 4:0}
+
+    row =4
+    while outputSheet.cell(row=row, column=29).value is not None:
+        oct = int(outputSheet.cell(row=row, column=31).value)
+        count[oct]+=1
+        row+=1
+
+    for i in range(9):
+        for j in range(3):
+            row = last_row+2+i
+            col = 29+j
+            outputSheet.cell(row=row, column = col).border = black_border
+
+    outputSheet.cell(column=29, row=last_row+2).value = "Octant ID"
+    outputSheet.cell(column=30, row=last_row+2).value = "Octant Name "
+    outputSheet.cell(column=31, row=last_row+2).value = "Count of Rank 1 Mod Values"
+
+    for j, oct in enumerate(octant_sign):
+        outputSheet.cell(column=29, row=last_row+3+j).value = oct
+        outputSheet.cell(column=30, row=last_row+3+j).value = octant_name_id_mapping[oct]
+        outputSheet.cell(column=31, row=last_row+3+j).value = count[oct]
+
+def set_mod_count(outputSheet, mod, total_count):
+	# Initializing empty dictionary
+    count = {-1:0, 1:0, -2:0, 2:0, -3:0, 3:0, -4:0, 4:0}
+
+    # Variable to store last row
+    last_row = -1
+
+    # Iterating loop to set count dictionary
+    start = 0
+    while(start<total_count):
+        try:
+            count[int(outputSheet.cell(row=start+3, column=11).value)] +=1
+        except FileNotFoundError:
+            print("Output file not found!!")
+            exit()
+        except ValueError:
+            print("Row or column values must be at least 1 ")
+            exit()
+
+        start+=1
+        try:    
+            if(start%mod==0):
+                # Setting row data
+                try:
+                    row = 4 + start//mod
+                    last_row = row
+                    outputSheet.cell(row=row, column=14).value = str(start-mod) + "-" + str(min(total_count, start-1))
+
+                    for i, label in enumerate(octant_sign):
+                        outputSheet.cell(row=row, column=15+i).value = count[label]
+
+                    set_rank_count(row,count, outputSheet)
+                except FileNotFoundError:
+                    print("Output file not found!!")
+                    exit()
+                except ValueError:
+                    print("Row or column values must be at least 1 ")
+                    exit()
+
+                # Reset count values
+                count = {-1:0, 1:0,  -2:0, 2:0, -3:0, 3:0, -4:0, 4:0}
+        except ZeroDivisionError:
+            print("Mod can't have 0 value")
+            exit()
+    try:
+        if(start%mod!=0):
+            # Setting row data
+            try:
+                row = 5 + start//mod
+                last_row = row
+                outputSheet.cell(row=row, column=14).value = str(start-mod) + "-" + str(min(total_count, start-1))
+                for i, label in enumerate(octant_sign):
+                    outputSheet.cell(row=row, column=15+i).value = count[label]
+                
+                set_rank_count(row,count, outputSheet)
+            except FileNotFoundError:
+                print("Output file not found!!")
+                exit()
+            except ValueError:
+                print("Row or column values must be at least 1 ")
+                exit()
+
+    except ZeroDivisionError:
+        print("Mod can't have 0 value")
+        exit()
+
+    if(last_row!=-1):
+        overall_octant_rank_func(last_row, outputSheet)
+
+
 def setOverallCount(total_count, outputSheet):	
 	# Initializing count dictionary
     count = {-1:0, 1:0, -2:0, 2:0, -3:0, 3:0, -4:0, 4:0}
@@ -271,6 +365,8 @@ def entry_point(input_file, mod):
 
 	total_count = set_input_data(input_file, outputSheet)
 	set_overall_octant_rank_count(outputSheet, mod, total_count)
+	set_mod_count(outputSheet, mod, total_count)
+
 	outputFile.save(outputFileName)
 
 def octant_analysis(mod=5000):

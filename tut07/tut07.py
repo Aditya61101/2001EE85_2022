@@ -26,9 +26,87 @@ yellow = "00FFFF00"
 yellow_bg = PatternFill(start_color=yellow, end_color= yellow, fill_type='solid')
 black = "00000000"
 double = Side(border_style="thin", color=black)
-blackBorder = Border(top=double, left=double, right=double, bottom=double)
+black_border = Border(top=double, left=double, right=double, bottom=double)
 
 ###Code
+def set_rank_count(row,countMap, outputSheet):
+    # Copying the count list to sort
+    sortedCount = []
+    count = []
+    for label in octant_sign:
+        count.append(countMap[label])
+
+    for ct in count:
+        sortedCount.append(ct)
+
+    sortedCount.sort(reverse=True)
+
+    rank = []
+
+    for i, el in enumerate(count):
+        for j, ell in enumerate(sortedCount):
+            if(ell==el):
+                rank.append(j+1)
+                sortedCount[j] = -1
+                break
+    rank1Oct = -10
+
+    for j in range(0,8):
+        outputSheet.cell(row = row, column=23+j).value = rank[j]
+        if(rank[j]==1):
+            rank1Oct = octant_sign[j]
+            outputSheet.cell(row = row, column=23+j).fill = yellow_bg    
+
+    outputSheet.cell(row=row , column=31).value = rank1Oct
+    outputSheet.cell(row=row , column=32).value = octant_name_id_mapping[rank1Oct]
+
+def setOverallCount(total_count, outputSheet):	
+	# Initializing count dictionary
+    count = {-1:0, 1:0, -2:0, 2:0, -3:0, 3:0, -4:0, 4:0}
+    # Incrementing count dictionary data
+    try:
+        for i in range (3,total_count+3):
+            count[int(outputSheet.cell(column=11, row=i).value)] = count[int(outputSheet.cell(column=11, row=i).value)] +1
+    except FileNotFoundError:
+        print("Output file not found!!")
+        exit()
+    except ValueError:
+        print("Sheet input can't be converted to int or row/colum should be atleast 1")
+        exit()
+    except TypeError:
+        print("Sheet doesn't contact valid octant value!!")
+        exit()
+
+    # Setting data into sheet
+    for i, label in enumerate(octant_sign):
+        try:
+            outputSheet.cell(row=4, column=i+15).value = count[label]
+        except FileNotFoundError:
+            print("Output file not found!!")
+            exit()
+        except ValueError:
+            print("Row or column values must be at least 1 ")
+            exit()
+
+    set_rank_count(4, count, outputSheet)
+
+def set_overall_octant_rank_count(outputSheet, mod, total_count):
+    headers = ["Octant ID",1,-1,2,-2,3,-3,+4,-4,"Rank Octant 1", "Rank Octant -1","Rank Octant 2","Rank Octant -2","Rank Octant 3","Rank Octant -3","Rank Octant 4","Rank Octant -4","Rank1 Octant ID","Rank1 Octant Name"]
+
+    totalRows = total_count//mod+1+1 # header + overall
+    if total_count%mod!=0:
+        totalRows+=1
+
+    for i, header in enumerate(headers):
+        for j in range(totalRows):
+            outputSheet.cell(row=3+j, column = 14+i).border = black_border
+
+    for i, header in enumerate(headers):
+        outputSheet.cell(row=3, column = i+14).value = header
+
+    outputSheet.cell(row=4, column = 13).value = "Mod " + str(mod)
+
+    setOverallCount(total_count, outputSheet)
 
 # Method based on if-else to return octant type
 def get_octant(x,y,z):
@@ -192,6 +270,7 @@ def entry_point(input_file, mod):
 		outputSheet.cell(row=2, column=i+1).value = header
 
 	total_count = set_input_data(input_file, outputSheet)
+	set_overall_octant_rank_count(outputSheet, mod, total_count)
 	outputFile.save(outputFileName)
 
 def octant_analysis(mod=5000):

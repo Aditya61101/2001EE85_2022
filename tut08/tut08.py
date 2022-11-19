@@ -7,6 +7,26 @@ def get_fall(element):
     fall_at = int(element[:element.index('-')])
     return(fall_at)
 
+def pak_innings_scorecard(pak_batter_stats, pak_score, pak_fall_of_wickets, ind_bowler_stats, pak_power_play_runs):
+    
+    with open('Scorecard.txt','w') as scorecard:
+        scorecard.write(f"{'## PAKISTAN INNINGS': <18} {pak_score: <10}\n")
+        scorecard.write(f"\n{'Batter': <23}{' ': <45}{'R': ^5}{'B': ^5}{'4s': ^5}{'6s': ^5}{'SR': >7}")
+        for batter in pak_batter_stats:
+            scorecard.write(f"\n{batter: <23}{pak_batter_stats[batter][-1]: <45}{pak_batter_stats[batter][0]: ^5}{pak_batter_stats[batter][1]: ^5}{pak_batter_stats[batter][2]: ^5}{pak_batter_stats[batter][3]: ^5}{pak_batter_stats[batter][4]: ^8}")
+
+        scorecard.write('\n\nFall of Wickets\n')
+        fall_statement = ''
+        for outs in pak_fall_of_wickets:
+            fall_statement += outs + ', '
+        scorecard.write(fall_statement[:-2])
+
+        scorecard.write(f"\n\n{'Bowler': <23}{'O': ^5}{'M': ^5}{'R': ^5}{'W': ^5}{'NB': ^5}{'WD': ^5}{'ECO': >5}")
+        for bowler in ind_bowler_stats:
+            scorecard.write(f"\n{bowler: <23}{ind_bowler_stats[bowler][0][-1]: ^5}{ind_bowler_stats[bowler][1]: ^5}{ind_bowler_stats[bowler][2]: ^5}{ind_bowler_stats[bowler][3]: ^5}{ind_bowler_stats[bowler][4]: ^5}{ind_bowler_stats[bowler][5]: ^5}{ind_bowler_stats[bowler][6]: ^7}")
+
+        scorecard.write(f"\n\n{'Powerplays': <15}{'Overs': ^8}{'Runs': >8}")
+        scorecard.write(f"\n{'Mandatory': <15}{'0.1-6': ^8}{pak_power_play_runs: >8}")
 
 def pak_innings(team_pak, team_ind, pak_extras):
     ind_players = {'Batters': [], 'Bowlers': []}
@@ -273,7 +293,7 @@ def pak_innings(team_pak, team_ind, pak_extras):
     print(f"{'Mandatory': <15}{'0.1-6': ^8}{pak_power_play_runs: >8}")
 
     #saving pak innings
-    # pak_innings_scorecard(pak_batter_stats, pak_score, pak_fall_of_wickets, ind_bowler_stats, pak_power_play_runs )
+    pak_innings_scorecard(pak_batter_stats, pak_score, pak_fall_of_wickets, ind_bowler_stats, pak_power_play_runs )
 
 def team_ind_list():
     with open('teams.txt') as team_file:

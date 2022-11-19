@@ -612,8 +612,6 @@ def team_pak_list():
         return team_pak
 
 def scorecard():
-    pak_extras = 0
-    ind_extras = 0
     team_pak = team_pak_list()
     team_ind = team_ind_list()
     pak_innings(team_pak, team_ind)

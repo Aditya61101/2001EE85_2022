@@ -3,9 +3,31 @@ import math
 from datetime import datetime
 start_time = datetime.now()
 
+os.system('cls')
+
 def get_fall(element):
     fall_at = int(element[:element.index('-')])
     return(fall_at)
+
+def ind_innings_scorecard(ind_batter_stats, ind_score, ind_fall_of_wickets, pak_bowler_stats, ind_power_play_runs ):
+    with open('Scorecard.txt','a') as scorecard:
+        scorecard.write(f"\n\n{'## INDIA INNINGS': <18} {ind_score: <10}\n")
+        scorecard.write(f"\n{'Batter': <23}{' ': <45}{'R': ^5}{'B': ^5}{'4s': ^5}{'6s': ^5}{'SR': >7}")
+        for batter in ind_batter_stats:
+            scorecard.write(f"\n{batter: <23}{ind_batter_stats[batter][-1]: <45}{ind_batter_stats[batter][0]: ^5}{ind_batter_stats[batter][1]: ^5}{ind_batter_stats[batter][2]: ^5}{ind_batter_stats[batter][3]: ^5}{ind_batter_stats[batter][4]: ^8}")
+
+        scorecard.write('\n\nFall of Wickets\n')
+        fall_statement = ''
+        for outs in ind_fall_of_wickets:
+            fall_statement += outs + ', '
+        scorecard.write(fall_statement[:-2])
+
+        scorecard.write(f"\n\n{'Bowler': <23}{'O': ^5}{'M': ^5}{'R': ^5}{'W': ^5}{'NB': ^5}{'WD': ^5}{'ECO': >5}")
+        for bowler in pak_bowler_stats:
+            scorecard.write(f"\n{bowler: <23}{pak_bowler_stats[bowler][0][-1]: ^5}{pak_bowler_stats[bowler][1]: ^5}{pak_bowler_stats[bowler][2]: ^5}{pak_bowler_stats[bowler][3]: ^5}{pak_bowler_stats[bowler][4]: ^5}{pak_bowler_stats[bowler][5]: ^5}{pak_bowler_stats[bowler][6]: ^7}")
+
+        scorecard.write(f"\n\n{'Powerplays': <15}{'Overs': ^8}{'Runs': >8}")
+        scorecard.write(f"\n{'Mandatory': <15}{'0.1-6': ^8}{ind_power_play_runs: >8}")
 
 def ind_innings(team_pak, team_ind):
     ind_extras = 0
@@ -48,7 +70,7 @@ def ind_innings(team_pak, team_ind):
         i = last_line.index('.')
         last_over = float(line[:i+2]) + 1
         n_out = 0
-        ind_powerplay_runs = 0
+        ind_power_play_runs = 0
         for line in inns2:
             if(line == '\n'):
                 continue
@@ -220,8 +242,8 @@ def ind_innings(team_pak, team_ind):
             
             if(current_ball == '5.6'):
                 for batter in ind_batter_stats:
-                    ind_powerplay_runs += ind_batter_stats[batter][0]
-                ind_powerplay_runs += ind_extras
+                    ind_power_play_runs += ind_batter_stats[batter][0]
+                ind_power_play_runs += ind_extras
 
     for batter in ind_batter_stats:
         ind_batter_stats[batter][4] =  round(float(ind_batter_stats[batter][0]/ind_batter_stats[batter][1])*100,2)
@@ -242,13 +264,13 @@ def ind_innings(team_pak, team_ind):
             ind_outs += 1
     ind_total += ind_extras
 
-    ind_fall_wickets = []
+    ind_fall_of_wickets = []
     for batter in ind_batter_stats:
         if(ind_batter_stats[batter][-1] != 'not out'):
             fall = f'{ind_batter_stats[batter][-3]} ({batter}, {ind_batter_stats[batter][-2]})'
-            ind_fall_wickets.append(fall)
+            ind_fall_of_wickets.append(fall)
     
-    ind_fall_wickets.sort(key=get_fall)
+    ind_fall_of_wickets.sort(key=get_fall)
 
     ind_score = str(ind_total) + '-' + str(ind_outs) + f' ({str(ind_last_over)} Ov)'
     print(f"\n{'## INDIA INNINGS': <18} {ind_score: <10}\n")
@@ -261,7 +283,7 @@ def ind_innings(team_pak, team_ind):
 
     print('\nFall of Wickets')
     fall_statement = ''
-    for outs in ind_fall_wickets:
+    for outs in ind_fall_of_wickets:
         fall_statement += outs + ', '
     print(fall_statement[:-2])
 
@@ -270,8 +292,10 @@ def ind_innings(team_pak, team_ind):
         print(f"{bowler: <23}{pak_bowler_stats[bowler][0][-1]: ^5}{pak_bowler_stats[bowler][1]: ^5}{pak_bowler_stats[bowler][2]: ^5}{pak_bowler_stats[bowler][3]: ^5}{pak_bowler_stats[bowler][4]: ^5}{pak_bowler_stats[bowler][5]: ^5}{pak_bowler_stats[bowler][6]: ^7}")
 
     print(f"\n{'Powerplays': <15}{'Overs': ^8}{'Runs': >8}")
-    print(f"{'Mandatory': <15}{'0.1-6': ^8}{ind_powerplay_runs: >8}")
+    print(f"{'Mandatory': <15}{'0.1-6': ^8}{ind_power_play_runs: >8}")
 
+    #saving ind innings
+    ind_innings_scorecard(ind_batter_stats, ind_score, ind_fall_of_wickets, pak_bowler_stats, ind_power_play_runs )
 
 def pak_innings_scorecard(pak_batter_stats, pak_score, pak_fall_of_wickets, ind_bowler_stats, pak_power_play_runs):
     

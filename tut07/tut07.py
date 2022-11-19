@@ -28,7 +28,162 @@ black = "00000000"
 double = Side(border_style="thin", color=black)
 black_border = Border(top=double, left=double, right=double, bottom=double)
 
-###Code
+#Code
+def transition_count_func(row, transition_count, outputSheet):
+    # Setting hard coded inputs
+    try:
+        outputSheet.cell(row=row, column=36).value = "To"
+        outputSheet.cell(row=row+1, column=35).value = "Octant #"
+        outputSheet.cell(row=row+2, column=34).value = "From"
+
+        for i in range(35, 44):
+            for j in range(row+1, row+1+9):
+                outputSheet.cell(row=j, column = i).border = black_border
+
+    except FileNotFoundError:
+        print("Output file not found!!")
+        exit()
+    except ValueError:
+        print("Row or column values must be at least 1 ")
+        exit()
+
+    # Setting Labels
+    for i, label in enumerate(octant_sign):
+        try:
+            outputSheet.cell(row=row+1, column=i+36).value=label
+            outputSheet.cell(row=row+i+2, column=35).value=label
+        except FileNotFoundError:
+            print("Output file not found!!")
+            exit()
+        except ValueError:
+            print("Row or column values must be at least 1 ")
+            exit()
+
+    # Setting data
+    for i, l1 in enumerate(octant_sign):
+        maxi = -1
+
+        for j, l2 in enumerate(octant_sign):
+            val = transition_count[str(l1)+str(l2)]
+            maxi = max(maxi, val)
+
+        for j, l2 in enumerate(octant_sign):
+            try:
+                outputSheet.cell(row=row+i+2, column=36+j).value = transition_count[str(l1)+str(l2)]
+                if transition_count[str(l1)+str(l2)] == maxi:
+                    maxi = -1
+                    outputSheet.cell(row=row+i+2, column=36+j).fill = yellow_bg
+            except FileNotFoundError:
+                print("Output file not found!!")
+                exit()
+            except ValueError:
+                print("Row or column values must be at least 1 ")
+                exit()
+
+def set_mod_overall_transition_count(outputSheet, mod, total_count):
+	# Counting partitions w.r.t. mod
+    try:
+        totalPartition = total_count//mod
+    except ZeroDivisionError:
+        print("Mod can't have 0 value")
+        exit()
+
+    # Checking mod value range
+    if(mod<0):
+        raise Exception("Mod value should be in range of 1-30000")
+
+    if(total_count%mod!=0):
+        totalPartition +=1
+
+    # Initializing row start for data filling
+    rowStart = 16
+
+    # Iterating all partitions 
+    for i in range (0,totalPartition):
+        # Initializing start and end values
+        start = i*mod
+        end = min((i+1)*mod-1, total_count-1)
+
+        # Setting start-end values
+        try:
+            outputSheet.cell(column=35, row=rowStart-1 + 13*i).value = "Mod Transition Count"
+            outputSheet.cell(column=35, row=rowStart + 13*i).value = str(start) + "-" + str(end)
+        except FileNotFoundError:
+            print("Output file not found!!")
+            exit()
+        except ValueError:
+            print("Row or column values must be at least 1 ")
+            exit()
+
+        # Initializing empty dictionary
+        transCount = {}
+        for a in range (1,5):
+            for b in range(1,5):
+                transCount[str(a)+str(b)]=0
+                transCount[str(a)+str(-b)]=0
+                transCount[str(-a)+str(b)]=0
+                transCount[str(-a)+str(-b)]=0
+                
+        # Counting transition for range [start, end)
+        for a in range(start, end+1):
+            try:
+                curr = outputSheet.cell(column=11, row=a+3).value
+                next = outputSheet.cell(column=11, row=a+4).value
+            except FileNotFoundError:
+                print("Output file not found!!")
+                exit()
+            except ValueError:
+                print("Row or column values must be at least 1 ")
+                exit()
+
+            # Incrementing count for within range value
+            if(next!=None):
+                transCount[str(curr) + str(next)]+=1
+
+        # Setting transition counts
+        transition_count_func(rowStart + 13*i, transCount, outputSheet)
+
+def set_overall_Transition_Count(outputSheet, total_count):
+	# Initializing empty dictionary
+    count_transition = {}
+    for i in range (1,5):
+        for j in range(1,5):
+            count_transition[str(i)+str(j)]=0
+            count_transition[str(i)+str(-j)]=0
+            count_transition[str(-i)+str(j)]=0
+            count_transition[str(-i)+str(-j)]=0
+        
+    # Iterating octants values to fill dictionary
+    start = 0
+
+    # try and except block for string to int conversion
+    try:
+        last = int(outputSheet["K3"].value)
+    except ValueError:
+        print("Sheet input can't be converted to int")
+        exit()
+    except TypeError:
+        print("Sheet doesn't contain integer octant")
+        exit()
+
+    while(start<total_count-1):
+        # try and except block for string to int conversion
+        try:
+            curr = int(outputSheet.cell(row= start+4, column=11).value)
+            count_transition[str(last) + str(curr)]+=1
+            last = curr
+        except ValueError:
+            print("Sheet input can't be converted to int")
+            exit()
+        except TypeError:
+            print("Sheet doesn't contain integer octant")
+            exit()
+
+        start += 1
+    
+    # Setting transitions counted into sheet
+    transition_count_func(2, count_transition, outputSheet)
+
 def set_rank_count(row,countMap, outputSheet):
     # Copying the count list to sort
     sortedCount = []
@@ -366,7 +521,8 @@ def entry_point(input_file, mod):
 	total_count = set_input_data(input_file, outputSheet)
 	set_overall_octant_rank_count(outputSheet, mod, total_count)
 	set_mod_count(outputSheet, mod, total_count)
-
+	set_overall_Transition_Count(outputSheet, total_count)
+	set_mod_overall_transition_count(outputSheet, mod, total_count)
 	outputFile.save(outputFileName)
 
 def octant_analysis(mod=5000):

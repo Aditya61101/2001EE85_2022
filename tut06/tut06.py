@@ -22,6 +22,49 @@ roll_to_name = {}
 roll_attendance = {}
 dates = []
 
+def consolidate_attendance_func():
+    outputFileName = "output/attendance_report_consolidated.xlsx"
+    outputFile = openpyxl.Workbook()
+    outputSheet = outputFile.active
+
+    outputSheet.cell(row=1, column=1).value = "Roll"
+    outputSheet.cell(row=1, column=2).value = "Name"
+
+    last = -1
+    for i, date in enumerate(dates):
+        outputSheet.cell(row=1, column=3+i).value = date
+        last = i+3
+
+    last += 1
+    list = ["Actual Lecture Taken", "Total Real", "% Attendance"]
+
+    for i, title in enumerate(list):
+        outputSheet.cell(row=1, column=last+i).value = title
+
+    for i, rollNum in enumerate(roll_to_name.keys()):
+        outputSheet.cell(row=i+2, column=1).value = rollNum
+        outputSheet.cell(row=i+2, column=2).value = roll_to_name[rollNum]
+
+        present = 0
+        for j, date in enumerate(dates):
+            if date not in roll_attendance[rollNum]:
+                outputSheet.cell(row=i+2, column=j+3).value = "A"
+            else:
+                list = roll_attendance[rollNum][date]
+                total = list[0]+list[1]+list[2]
+                if total == 0:
+                    outputSheet.cell(row=i+2, column=j+3).value = "A"
+                else:
+                    outputSheet.cell(row=i+2, column=j+3).value = "P"
+                    present += 1
+
+        outputSheet.cell(row=i+2, column=last).value = len(dates)
+        outputSheet.cell(row=i+2, column=last+1).value = present
+        percentage_attendance = (100*present)/len(dates)
+        percentage_attendance = round(percentage_attendance, 2)
+        outputSheet.cell(row=i+2, column=last+2).value = percentage_attendance
+
+    outputFile.save(outputFileName)
 
 def roll_attendance_func():
     title = ["Date", "Roll", "Name", "Total Attendance Count",
@@ -58,6 +101,7 @@ def roll_attendance_func():
 
         outputFile.save(outputFileName)
 
+
 def valid_day(date):
     # check date validity - 0 for monday and 3 for thursday
     # dt = '7-11-2022' - dummy date
@@ -67,6 +111,7 @@ def valid_day(date):
         return True
 
     return False
+
 
 def valid_time(time):
     # e.g., time = 15:30
@@ -78,6 +123,7 @@ def valid_time(time):
     if hr == 14:
         return True
     return False
+
 
 def attendance_count_func():
     # Opening input file
@@ -112,6 +158,7 @@ def attendance_count_func():
             else:
                 roll_attendance[rollNumber][date][2] += 1
 
+
 def map_roll_to_num_func():
     # Opening input file
     f = open(inputRegisteredFile, "r")
@@ -133,6 +180,7 @@ def map_roll_to_num_func():
 
     f.close()
 
+
 def attendance_report():
     # Method to map roll num to name
     map_roll_to_num_func()
@@ -140,6 +188,8 @@ def attendance_report():
     attendance_count_func()
     # Saving rollNum attendance
     roll_attendance_func()
+    # Saving consolidate attendance
+    consolidate_attendance_func()
 
 
 attendance_report()

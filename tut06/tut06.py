@@ -1,7 +1,13 @@
 import os
 import openpyxl
+import smtplib
 from platform import python_version
 from datetime import datetime
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+
 start_time = datetime.now()
 
 ver = python_version()
@@ -13,12 +19,57 @@ if ver == "3.8.10":
 else:
     print("Please install 3.8.10. Instruction are present in the GitHub Repo/Webmail. Url: https://pastebin.com/nvibxmjw")
 
-inputAttendance = "input_attendance.csv"
-inputRegisteredFile = "input_registered_students.csv"
+attendance_details = "input_attendance.csv"
+student_details = "input_registered_students.csv"
 
 roll_to_name = {}
 roll_attendance = {}
 dates = []
+
+def email_send_func():
+    will_send_email = input("Do you want to send Consolidate attendance report as an email? (y/n\n)")
+    if will_send_email is not 'y' and will_send_email is not 'Y':
+        return
+
+    # Setup port number and server
+    smtp_port = 587
+    smtp_server = "smtp.gmail.com"
+
+    sender_email = "adityakumarsanni.2001@gmail.com"
+    password = "changeme"
+
+    # receiver_email 
+    receiver_email = "cs3842022@gmail.com" 
+
+    subject = "Consolidated Attendance report"
+
+    message = MIMEMultipart()
+    message['From'] = sender_email
+    message['To'] = receiver_email
+    message['Subject'] = subject
+
+    # File to be sent as attachment
+    file_to_send = "output/attendance_report_consolidated.xlsx" 
+
+    # Opening file as binary
+    file = open(file_to_send, "rb")
+
+    # Encoding file as Base64
+    pack_attach = MIMEBase("application", "octet-stream")
+    pack_attach.set_payload((file).read())
+    encoders.encode_base64(pack_attach)
+    pack_attach.add_header("Content-Disposition", 'attachment; filename= '+ file_to_send)
+    message.attach(pack_attach)
+
+    # Casting message as string
+    text = message.as_string()
+
+    TIE_SERVER = smtplib.SMTP(smtp_server, smtp_port)
+    TIE_SERVER.starttls()
+    TIE_SERVER.login(sender_email, password)
+
+    TIE_SERVER.sendmail(sender_email, receiver_email, text)
+    print("Email sent successfully to: ", receiver_email)
 
 def consolidate_attendance_func():
     try:
@@ -40,16 +91,16 @@ def consolidate_attendance_func():
         for i, title in enumerate(list):
             outputSheet.cell(row=1, column=last+i).value = title
 
-        for i, rollNum in enumerate(roll_to_name.keys()):
-            outputSheet.cell(row=i+2, column=1).value = rollNum
-            outputSheet.cell(row=i+2, column=2).value = roll_to_name[rollNum]
+        for i, roll_no in enumerate(roll_to_name.keys()):
+            outputSheet.cell(row=i+2, column=1).value = roll_no
+            outputSheet.cell(row=i+2, column=2).value = roll_to_name[roll_no]
 
             present = 0
             for j, date in enumerate(dates):
-                if date not in roll_attendance[rollNum]:
+                if date not in roll_attendance[roll_no]:
                     outputSheet.cell(row=i+2, column=j+3).value = "A"
                 else:
-                    list = roll_attendance[rollNum][date]
+                    list = roll_attendance[roll_no][date]
                     total = list[0]+list[1]+list[2]
                     if total == 0:
                         outputSheet.cell(row=i+2, column=j+3).value = "A"
@@ -72,18 +123,18 @@ def roll_attendance_func():
     title = ["Date", "Roll", "Name", "Total Attendance Count",
              "Real", "Duplicate", "Invalid", "Absent"]
 
-    for rollNum in roll_to_name.keys():
+    for roll_no in roll_to_name.keys():
         try:
-            outputFileName = "output/" + rollNum + ".xlsx"
+            outputFileName = "output/" + roll_no + ".xlsx"
             outputFile = openpyxl.Workbook()
             outputSheet = outputFile.active
 
             for i, word in enumerate(title):
                 outputSheet.cell(row=1, column=i+1).value = word
-            outputSheet.cell(row=2, column=2).value = rollNum
-            outputSheet.cell(row=2, column=3).value = roll_to_name[rollNum]
+            outputSheet.cell(row=2, column=2).value = roll_no
+            outputSheet.cell(row=2, column=3).value = roll_to_name[roll_no]
 
-            attendance = roll_attendance[rollNum]  # map of date -> array
+            attendance = roll_attendance[roll_no]  # map of date -> array
 
             for i, date in enumerate(attendance.keys()):
                 outputSheet.cell(row=3+i, column=1).value = date
@@ -105,14 +156,12 @@ def roll_attendance_func():
             print("The folder output doesn't exist")
             exit()
 
-
 def valid_day(date):
     day_rank = datetime.strptime(date, '%d-%m-%Y').weekday()
 
     if day_rank == 0 or day_rank == 3:
         return True
     return False
-
 
 def valid_time(time):
     # e.g., time = 15:30
@@ -125,11 +174,10 @@ def valid_time(time):
         return True
     return False
 
-
 def attendance_count_func():
     try:
         # Opening input file
-        f = open(inputAttendance, "r")
+        f = open(attendance_details, "r")
 
         f.readline()
 
@@ -142,32 +190,31 @@ def attendance_count_func():
             line = line.strip()
             timestamp, naming = line.split(",")
             date, time = timestamp.split(" ")
-            rollNumber = naming[:8]
+            roll_nober = naming[:8]
 
             if valid_day(date):
                 if date not in dates:
                     dates.append(date)
 
-                if date not in roll_attendance[rollNumber]:
-                    roll_attendance[rollNumber][date] = [0, 0, 0]
+                if date not in roll_attendance[roll_nober]:
+                    roll_attendance[roll_nober][date] = [0, 0, 0]
 
                 if valid_time(time):
-                    if (roll_attendance[rollNumber][date][0] == 0):
-                        roll_attendance[rollNumber][date][0] = 1
+                    if (roll_attendance[roll_nober][date][0] == 0):
+                        roll_attendance[roll_nober][date][0] = 1
                     else:
-                        roll_attendance[rollNumber][date][1] += 1
+                        roll_attendance[roll_nober][date][1] += 1
 
                 else:
-                    roll_attendance[rollNumber][date][2] += 1
+                    roll_attendance[roll_nober][date][2] += 1
     except FileNotFoundError:
         print('File not found')
         exit()
 
-
 def map_roll_to_num_func():
     try:
         # Opening input file
-        f = open(inputRegisteredFile, "r")
+        f = open(student_details, "r")
         # Reading label line
         f.readline()
         # Reading all lines of input
@@ -186,7 +233,6 @@ def map_roll_to_num_func():
         print("File not found")
         exit()
 
-
 def attendance_report():
     try:
         # Method to map roll num to name
@@ -201,7 +247,7 @@ def attendance_report():
         print('Either the function is not created or the name is not correct.')
         exit()
     try:
-        # Saving rollNum attendance
+        # Saving roll_no attendance
         roll_attendance_func()
     except NameError:
         print('Either the function is not created or the name is not correct.')
@@ -209,6 +255,11 @@ def attendance_report():
     try:
         # Saving consolidate attendance
         consolidate_attendance_func()
+    except NameError:
+        print('Either the function is not created or the name is not correct.')
+        exit()
+    try:
+        email_send_func()
     except NameError:
         print('Either the function is not created or the name is not correct.')
         exit()

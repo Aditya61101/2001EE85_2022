@@ -62,6 +62,6 @@ def take_input():
                                 subprocess.run(["python", "psat_v3.py", str(constant_fk2d_value), str(multiplying_factor_value), str(Shear_velocity_value), str(option),str(corr), str(snr), str(lambda_value), str(k_value), str(replacement_method)])
                                 st.text("Computed! You can check your Results_v2.csv to see the computed values!!")
     except:
-        print("Something went wrong. Please refresh and try again!")
+        st.text("Something went wrong. Please refresh and try again!")
         exit(1)
 take_input()

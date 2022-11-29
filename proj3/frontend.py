@@ -19,7 +19,7 @@ def take_input():
     multiplying_factor_value = st.number_input('Enter multiplying_factor_value', step=.01, format="%.2f")
 
     Shear_velocity_value = st.number_input('Enter Shear_velocity_value', step=.01, format="%.2f")
-    
+
     # variables to be used defined
     corr, snr, k_value, lambda_value = 0, 0, 0.0, 0.0
 
@@ -52,5 +52,9 @@ def take_input():
                 snr = st.number_input('Enter Threshold value of S', step=1)
                 lambda_value = st.number_input('Enter Lambda value of A', step=.01, format="%.2f")
                 k_value = st.number_input('Enter k value of A', step=.01, format="%.2f")
-
+            if st.button("Go to Replace") or st.session_state.replace:
+                if option>0:
+                    st.session_state['replace'] = True
+                    st.text(" 1. Previous Point\n 2. 2*last-2nd_last\n 3. Overall_Mean\n 4. 12_Point_Strategy\n 5. Mean Of Previous 2 Points\n 6. All Sequential\n 7. All Parallel\n")
+                    replacement_method = st.number_input("Choose Replacement Method From Above ", step=1, min_value=1, max_value=7)
 take_input()

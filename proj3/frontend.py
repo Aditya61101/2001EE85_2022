@@ -57,4 +57,9 @@ def take_input():
                     st.session_state['replace'] = True
                     st.text(" 1. Previous Point\n 2. 2*last-2nd_last\n 3. Overall_Mean\n 4. 12_Point_Strategy\n 5. Mean Of Previous 2 Points\n 6. All Sequential\n 7. All Parallel\n")
                     replacement_method = st.number_input("Choose Replacement Method From Above ", step=1, min_value=1, max_value=7)
+                    if st.button("Compute"):
+                        if replacement_method>0:
+                            subprocess.run(["python", "psat_v3.py", str(constant_fk2d_value), str(multiplying_factor_value), str(Shear_velocity_value), str(option),str(corr), str(snr), str(lambda_value), str(k_value), str(replacement_method)])
+                            st.text("Computed! You can check your Results_v2.csv to see the computed values!!")
+
 take_input()

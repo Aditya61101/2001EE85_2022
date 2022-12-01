@@ -14,15 +14,14 @@ if "filter" not in st.session_state:
 
 def take_input():
     try:
-        # taking inputs for constant_fk2d, multiplying_factor, Shear_velocity
-        st.markdown("---")
         st.markdown("<h1 style='text-align: center;'>Project PSAT v3.0</h1>", unsafe_allow_html=True)
         st.markdown("---")
-        constant_fk2d_value = st.number_input('Enter constant_fk2d_value', step=.01, format="%.2f")
+        # taking inputs for constant_fk2d, multiplying_factor, Shear_velocity
+        constant_fk2d_value = st.number_input('Enter constant_fk2d_value', step=.01, format="%.2f", value=0.75)
 
-        multiplying_factor_value = st.number_input('Enter multiplying_factor_value', step=.01, format="%.2f")
+        multiplying_factor_value = st.number_input('Enter multiplying_factor_value', step=.01, format="%.2f", value=0.50)
 
-        Shear_velocity_value = st.number_input('Enter Shear_velocity_value', step=.01, format="%.2f")
+        Shear_velocity_value = st.number_input('Enter Shear_velocity_value', step=.01, format="%.2f", value=17.87)
 
         # initializing variables to be used
         corr, snr, k_value, lambda_value = 0, 0, 0.0, 0.0
@@ -32,37 +31,34 @@ def take_input():
             st.session_state['filter'] = True
             if constant_fk2d_value>0 and multiplying_factor_value>0 and Shear_velocity_value>0:
                 st.text(" 1. C\n 2. S\n 3. A\n 4. C & S\n 5. C & A\n 6. S & A\n 7. C & S & A\n 8. All Combine")
-                # option = st.number_input("Choose filtering method from above", min_value=0, max_value=8, step=1)
-                option = st.selectbox("Choose the filtering method from above", options=('Select here',1,2,3,4,5,6,7,8), key='option')
+                option = st.selectbox("Choose the filtering method from above", [1,2,3,4,5,6,7,8], index=0)
                 if option == 1:
-                    corr = st.number_input('Enter Threshold value of C', step=1)
+                    corr = st.number_input('Enter Threshold value of C', step=1, value=15)
                 elif option == 2:
-                    snr = st.number_input('Enter Threshold value of S', step=1)
+                    snr = st.number_input('Enter Threshold value of S', step=1, value=20)
                 elif option == 3:
-                    lambda_value = st.number_input('Enter Lambda value of A', step=.01, format="%.2f")
-                    k_value = st.number_input('Enter k value of A', step=.01, format="%.2f")
+                    lambda_value = st.number_input('Enter Lambda value of A', step=.01, format="%.2f", value=12.33)
+                    k_value = st.number_input('Enter k value of A', step=.01, format="%.2f", value=20.33)
                 elif option == 4:
-                    corr = st.number_input('Enter Threshold value of C', step=1)
-                    snr = st.number_input('Enter Threshold value of S', step=1)
+                    corr = st.number_input('Enter Threshold value of C', step=1, value=15)
+                    snr = st.number_input('Enter Threshold value of S', step=1, value=20)
                 elif option == 5:
-                    corr = st.number_input('Enter Threshold value of C', step=1)
-                    lambda_value = st.number_input('Enter Lambda value of A', step=.01, format="%.2f")
-                    k_value = st.number_input('Enter k value of A', step=.01, format="%.2f")
+                    corr = st.number_input('Enter Threshold value of C', step=1, value=15)
+                    lambda_value = st.number_input('Enter Lambda value of A', step=.01, format="%.2f", value=12.33)
+                    k_value = st.number_input('Enter k value of A', step=.01, format="%.2f", value=20.33)
                 elif option == 6:
-                    snr = st.number_input('Enter Threshold value of S', step=1)
-                    lambda_value = st.number_input('Enter Lambda value of A', step=.01, format="%.2f")
-                    k_value = st.number_input('Enter k value of A', step=.01, format="%.2f")
+                    snr = st.number_input('Enter Threshold value of S', step=1, value=20)
+                    lambda_value = st.number_input('Enter Lambda value of A', step=.01, format="%.2f", value=12.33)
+                    k_value = st.number_input('Enter k value of A', step=.01, format="%.2f", value=20.33)
                 elif option == 7 or option == 8:
-                    corr = st.number_input('Enter Threshold value of C', step=1)
-                    snr = st.number_input('Enter Threshold value of S', step=1)
-                    lambda_value = st.number_input('Enter Lambda value of A', step=.01, format="%.2f")
-                    k_value = st.number_input('Enter k value of A', step=.01, format="%.2f")
+                    corr = st.number_input('Enter Threshold value of C', step=1, value=15)
+                    snr = st.number_input('Enter Threshold value of S', step=1, value=20)
+                    lambda_value = st.number_input('Enter Lambda value of A', step=.01, format="%.2f", value=12.33)
+                    k_value = st.number_input('Enter k value of A', step=.01, format="%.2f", value=20.33)
                 if st.button("Go to Replace") or st.session_state.replace:
                     if option>0:
                         st.session_state['replace'] = True
-                        # st.text(" 1. Previous Point\n 2. 2*last-2nd_last\n 3. Overall_Mean\n 4. 12_Point_Strategy\n 5. Mean Of Previous 2 Points\n 6. All Sequential\n 7. All Parallel\n")
-                        # replacement_method = st.number_input("Choose Replacement Method From Above ", step=1, min_value=1, max_value=7)
-                        replacement_method = st.selectbox("Choose Replacement Method From Below ", ['1. Previous Point', '2. 2*last-2nd_last', '3. Overall Mean', '4. 12_Point_Strategy', '5. Mean of Previous 2 points', '6. All Sequential', '7. All Parallel'])
+                        replacement_method = st.selectbox("Choose Replacement Method From Below ", ['1. Previous Point', '2. 2*last-2nd_last', '3. Overall Mean', '4. 12_Point_Strategy', '5. Mean of Previous 2 points', '6. All Sequential', '7. All Parallel'], index=0)
                         replacement_method=int(replacement_method[0])
                         if st.button("Compute"):
                                 if replacement_method>0:

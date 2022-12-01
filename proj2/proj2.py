@@ -30,98 +30,100 @@ MOD = 0
 
 #Help
 def proj_octant_gui():
-	st.title ("Project2 Solution")
+    st.title ("Project2 Solution")
 
-	folderPath = ""
+    folderPath = ""
 
-	option = st.selectbox('How many files you want to convert?',('Single file', 'Complete folder'))
+    option = st.selectbox('How many files you want to convert?',('Single file', 'Complete folder'))
 
-	if option == "Single file":
-		global uploadedFile
-		uploadedFile = st.file_uploader("Upload File", type=['xlsx'],accept_multiple_files=False,key="fileUploader")
-		
-		if "folderPath" in st.session_state:
-			del st.session_state["folderPath"]
+    if option == "Single file":
+        global uploadedFile
+        uploadedFile = st.file_uploader("Upload File", type=['xlsx'],accept_multiple_files=False,key="fileUploader")
+        
+        if "folderPath" in st.session_state:
+            del st.session_state["folderPath"]
 
-	if option == "Complete folder":
-		uploadedFile = None
+    if option == "Complete folder":
+        uploadedFile = None
 
-		# Set up tkinter
-		root = tk.Tk()
-		root.withdraw()
+        # Set up tkinter
+        root = tk.Tk()
+        root.withdraw()
 
-		# Make folder picker dialog appear on top of other windows
-		root.wm_attributes('-topmost', 1)
+        # Make folder picker dialog appear on top of other windows
+        root.wm_attributes('-topmost', 1)
 
-		# Folder picker button
-		st.write('Please select a folder:')
-		clicked = st.button('Folder Picker')
-		if clicked:
-			folderPath = filedialog.askdirectory(master=root)
-			st.session_state["folderPath"] = folderPath
+        # Folder picker button
+        st.write('Please select a folder:')
+        clicked = st.button('Folder Picker')
+        if clicked:
+            folderPath = filedialog.askdirectory(master=root)
+            st.session_state["folderPath"] = folderPath
 
-	if "folderPath" in st.session_state:
-		folderPath = st.session_state["folderPath"]
-		dirname = st.text_input('Selected folder:', folderPath)
-
-
-	global MOD
-	MOD = st.number_input('Enter MOD value: ', min_value=1,  value=5000, step=1)
-	
-
-	convert, download = st.columns(2)
-
-	with convert:
-		conv = st.button("Compute")
-
-		if conv:
-			if option == "Single file":
-				if not uploadedFile:
-					st.warning("Please upload a xlsx file")
-				else:
-					fileName = uploadedFile.name.split(".xlsx")[0]
-					outputFileName = startConversion(fileName)
-
-					with download:
-						with open(outputFileName, 'rb') as my_file:
-							st.download_button(label = 'Download File', data = my_file, file_name = outputFileName, mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') 
-
-			elif option == "Complete folder":
-				if "folderPath" in st.session_state:
-					folderPath = st.session_state["folderPath"]
-
-				folder = folderPath.split("/")[-1]
-
-				excel_files = glob.glob(os.path.join(folderPath, "*.xlsx"))
-
-				if len(folder) ==0:
-					st.warning("Please select a folder")
-					return
-
-				if len(excel_files)==0:
-					st.warning("No excel sheet found!!")
-					return
-
-				outputFolderName = getOutputFileName(folder) + ".zip"
-
-				zipObj = ZipFile(outputFolderName, "w")
-
-				for i,file in enumerate(excel_files):
-					uploadedFile = file
-					fileName = file.split(".xlsx")[0]
-					fileName = fileName.split("\\")[-1]
-
-					outputFileName = startConversion(fileName)
-
-					zipObj.write(outputFileName)
+    if "folderPath" in st.session_state:
+        folderPath = st.session_state["folderPath"]
+        dirname = st.text_input('Selected folder:', folderPath)
 
 
-				zipObj.close()
+    global MOD
+    MOD = st.number_input('Enter MOD value: ', min_value=1,  value=5000, step=1)
+    
+
+    convert, download = st.columns(2)
+
+    with convert:
+        conv = st.button("Compute")
+
+        if conv:
+            if option == "Single file":
+                if not uploadedFile:
+                    st.warning("Please upload a xlsx file")
+                else:
+                    with st.spinner("Please wait..."):
+                        fileName = uploadedFile.name.split(".xlsx")[0]
+                        outputFileName = startConversion(fileName)
+
+                        with download:
+                            with open(outputFileName, 'rb') as my_file:
+                                st.download_button(label = 'Download File', data = my_file, file_name = outputFileName, mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') 
+
+            elif option == "Complete folder":
+                if "folderPath" in st.session_state:
+                    folderPath = st.session_state["folderPath"]
+
+                folder = folderPath.split("/")[-1]
+
+                excel_files = glob.glob(os.path.join(folderPath, "*.xlsx"))
+
+                if len(folder) ==0:
+                    st.warning("Please select a folder")
+                    return
+
+                if len(excel_files)==0:
+                    st.warning("No excel sheet found!!")
+                    return
+
+                outputFolderName = getOutputFileName(folder) + ".zip"
+
+                zipObj = ZipFile(outputFolderName, "w")
+
+                with st.spinner("Please wait..."):
+                    for i,file in enumerate(excel_files):
+                        uploadedFile = file
+                        fileName = file.split(".xlsx")[0]
+                        fileName = fileName.split("\\")[-1]
+
+                        outputFileName = startConversion(fileName)
+
+                        zipObj.write(outputFileName)
 
 
-				with download:
-					with open(outputFolderName, 'rb') as my_file:
-						st.download_button(label="Download result", data=my_file, file_name=outputFolderName)
+                    zipObj.close()
+
+
+                    with download:
+                        with open(outputFolderName, 'rb') as my_file:
+                            st.download_button(label="Download result", data=my_file, file_name=outputFolderName)
 
 
 
@@ -909,18 +911,6 @@ def get_octant(x,y,z):
             return 4
         else:
             return -4
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
